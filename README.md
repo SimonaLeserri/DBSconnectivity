@@ -140,10 +140,7 @@ Open a terminal where these scripts are stored and
 27. I. gettingaverage.sh
 
 **Network**
-28. I. CerebrA2patient_network.sh
 
-29. I. anhedonia_network.sh
+28. I. anhedonia_network.sh
 
-30. I. anhedonia_VTA_overlap.sh
-
-31. I. network_overlap.py
+29. I. network_overlap.py

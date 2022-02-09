@@ -2,85 +2,88 @@ import argparse
 import matplotlib.pyplot as plt
 from my_tools import *
 
-def compute_overlap(VTA_tracts, VTA_tracts_path,total_weights,sorted_codes):
+
+def compute_overlap(VTA_tracts, VTA_tracts_path, total_weights, sorted_codes):
     overlap = {}
+    # for each VTA
     for VTA in VTA_tracts:
         overlap[VTA] = {}
-        for side in ['Right', 'Left']:
-            name = '{s}_{v}_overlap_weights.csv'.format(s=side, v=VTA)
-            size = os.path.getsize(os.path.join(VTA_tracts_path, VTA, name))
-            if size != 0:
-                sum_overlap = pd.read_csv(os.path.join(VTA_tracts_path, VTA, name), header=None, sep=' ',
-                                          dtype=np.float64).sum(axis=1).item()
-                percentage_overlap = round((sum_overlap / total_weights[side]) * 100, 2)
-                overlap[VTA][side] = percentage_overlap
-            else:
-                percentage_overlap = np.nan
-                overlap[VTA][side] = percentage_overlap
+        # read the file created in anhedonia_network.sh
+        name = 'Bilateral_{v}_overlap_weights.csv'.format(v=VTA)
+        size = os.path.getsize(os.path.join(VTA_tracts_path, VTA, name))
+        # if the VTa includes at least one AN streamline
+        if size != 0:
+            # read the weights of the recruited AN streamlines
+            sum_overlap = pd.read_csv(os.path.join(VTA_tracts_path, VTA, name), header=None, sep=' ',
+                                      dtype=np.float64).sum(axis=1).item()
+            # compute and save the % of AN activated by DBS
+            percentage_overlap = round((sum_overlap / total_weights) * 100, 2)
+            overlap[VTA] = percentage_overlap
+        else:
+            percentage_overlap = np.nan
+            overlap[VTA] = percentage_overlap
 
-    session_overlap_right_dict = {session_code: overlap[VTA_code]['Right'] for session_code, VTA_code in
-                                  enumerate(sorted_codes)}
-    session_overlap_left_dict = {session_code: overlap[VTA_code]['Left'] for session_code, VTA_code in
-                                 enumerate(sorted_codes)}
-    overlap_df = pd.DataFrame(zip(session_overlap_right_dict.values(), session_overlap_left_dict.values()),
-                              columns=['Right', 'Left'])
-    return overlap_df #a df with as many rows as there are sessions, column right and left with % overlap AN &DBS
+    overlap_df = pd.DataFrame({session_code: overlap[VTA_code] for session_code, VTA_code in
+                               enumerate(sorted_codes)}.values())
+    overlap_df.columns = ['Percentage_overlap']
+    return overlap_df  # a df with as many rows as there are sessions, column with % overlap AN &DBS
 
-def plot_overlap(overlap, measures_df, destination_folder):
-    print(destination_folder)
+
+def plot_overlap(overlap, measures_df, destination_folder, dates):
     if not os.path.exists(destination_folder):
         os.makedirs(destination_folder)
     for unique_measure in measures_df.measure.unique():
-        little_df=measures_df[measures_df.measure == unique_measure].reset_index()
-        fig, ax = plt.subplots(figsize=(10, 5))
-        plt.title('anhedonia network recruitment vs {} assessment'.format(unique_measure))
+        if unique_measure == 'SHAPS':  # is the Anhedonia measure
+            little_df = measures_df[measures_df.measure == unique_measure].reset_index()
+            fig, ax = plt.subplots(figsize=(10, 5))
+            plt.title('Anhedonia network recruitment vs {} assessment'.format(unique_measure))
 
-        # using the twinx() for creating another
-        # axes object for secondary y-Axis
-        ax2 = ax.twinx()
-        ax.plot(overlap.index, overlap['Right'], label='Right Connectivity', linestyle='--', color='g')
-        ax.plot(overlap.index, overlap['Left'], label='Left Connectivity', color='g')
-        ax.set_ylim([0, 100])
-        ax2.set_ylim([0, 100])
-        ax2.plot(little_df.index, little_df.value, label='Anhedonia scale', color='b')
+            # using the twinx() for creating another
+            # axes object for secondary y-Axis
+            ax2 = ax.twinx()
+            plot_1 = ax.plot(overlap.index, overlap.Percentage_overlap, label='Structural connectivity', linestyle='--',
+                             color='g')
+            ax.set_xticks(overlap.index, dates, rotation=90)
+            ax.set_ylim([0, 100])
+            # giving labels to the axes
+            ax.set_xlabel('session')
+            ax.set_ylabel('% of Anhedonia network recruited - weights', color='g')
 
-        # giving labels to the axes
-        ax.set_xlabel('session')
-        ax.set_ylabel('% of Anhedonia network recruited - weights', color='g')
+            ax2.set_ylim([0, 100])
+            plot_2 = ax2.plot(little_df.index, little_df.value, label='Anhedonia scale', color='b')
+            # secondary y-axis label
+            ax2.set_ylabel('% of {} scale'.format(unique_measure), color='b')
 
-        # secondary y-axis label
-        ax2.set_ylabel('% of {} scale'.format(unique_measure), color='b')
-        plt.legend()
-        # defining display layout
-        plt.show()
-        plt.savefig(os.path.join(destination_folder, 'An_{}'.format(unique_measure)),bbox_inches="tight")
+            # add legends
+            lns = plot_1 + plot_2
+            labels = [l.get_label() for l in lns]
+            plt.legend(lns, labels)
+
+            # defining display layout
+            plt.show()
+            plt.savefig(os.path.join(destination_folder, 'AN_overlap_{}'.format(unique_measure)), bbox_inches="tight")
     return
 
 def main(args):
-    AN_right = os.path.join(args.patient_path, 'DWI', 'tractography', 'Right_AN_weights.csv')
-    AN_left = os.path.join(args.patient_path, 'DWI', 'tractography', 'Left_AN_weights.csv')
+    AN = os.path.join(args.patient_path, 'DWI', 'tractography', 'Bilateral_AN_weights.csv')
 
-    total_weights = {}
-    total_weights['Right'] = pd.read_csv(AN_right, header=None, sep=' ', dtype=np.float64).sum(axis=1).item()
-    total_weights['Left'] = pd.read_csv(AN_left, header=None, sep=' ', dtype=np.float64).sum(axis=1).item()
+    total_weights = pd.read_csv(AN, header=None, sep=' ', dtype=np.float64).sum(axis=1).item()
+
     VTA_tracts_path = os.path.join(args.patient_path, 'VTA_tracts')
     VTA_tracts = sorted([el for el in os.listdir(VTA_tracts_path) if el.startswith('VTA')])
 
     sorted_codes = np.load(os.path.join(args.plot_path, 'sorted_code_list.npy'), allow_pickle=True)
     sorted_codes = ['VTA_{0:0=2d}'.format(code) for code in sorted_codes]
-    overlap_df = compute_overlap(VTA_tracts, VTA_tracts_path, total_weights, sorted_codes)
-    #############
 
     dates = np.load(args.plot_path + '/sorted_dates.npy')
-    # the .npy files has the dates in the format "%d/%m/%Y"
-    # while the original excel assessment files follow "%d.%m.%Y"
 
+    overlap_df = compute_overlap(VTA_tracts, VTA_tracts_path, total_weights, sorted_codes)
     df = read_assessments(dates, args.assessment_path, args.baseline_file, args.files_to_remove)
-    plot_overlap(overlap_df, df, args.save_path)
+    plot_overlap(overlap_df, df, args.save_path, dates)
     return
 
 if __name__=="__main__":
-    parser = argparse.ArgumentParser(description='Plotting the MDD measurments evolution')
+    parser = argparse.ArgumentParser(description='Plotting % of fibers belonging to the Anhedonia network and recruited by DBS stimulation')
     parser.add_argument('--patient_path',type=str,help='Complete path to patient VTA')
     parser.add_argument('--assessment_path',type=str,help='Complete path to patient assessment folder')
     parser.add_argument('--files_to_remove', nargs='*', help='Are there files not to consider?') #give as string '' * means zero or more
