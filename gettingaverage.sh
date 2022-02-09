@@ -17,8 +17,14 @@ if [ "${pat_exist: -2}" = "-1" ] ; then
 exit
 fi
 
+#cd $path/$pat/VTA_tracts
 
-compute_Brodmann_average $path/$pat/VTA_tracts/plot/functional/significant_Voxels_for_measure_MADRS.nii $path/$pat/VTA_tracts/plot/functional/significant_Voxels_for_measure_MADRS_averaged.txt /media/brainstimmaps/DATA/20xx_Projects/2025_DBSinDepression/03_Data/AtlasCollection/Brodmann/Brodmann_known_default_bilateral_ATTEMPT.txt /media/brainstimmaps/DATA/20xx_Projects/2025_DBSinDepression/03_Data/functional_HCP/transformationsBrodmann/separated_Known_Brodmann/ciao
+for subdir in `find $path/$pat/VTA_tracts/VTA* -maxdepth 0 -type d`; do
+#compute_Brodmann_average  $subdir/z_fingerprint.nii $subdir/averaged_z_fingerprint.txt /media/brainstimmaps/DATA/20xx_Projects/2025_DBSinDepression/03_Data/AtlasCollection/Brodmann/Brodmann_known_default_bilateral_ATTEMPT.txt /media/brainstimmaps/DATA/20xx_Projects/2025_DBSinDepression/03_Data/functional_HCP/transformationsBrodmann/separated_Known_Brodmann/ciao
+python bimodal_plot.py --patient_path $path/$pat --plot_path $path/$pat/VTA_tracts/plot --save_path $subdir --VTA_code $subdir
+done
+
+
 #compute_Brodmann_average $path/$pat/VTA_tracts/plot/functional/HAMD_optimal_connectivity_profile.nii $path/$pat/VTA_tracts/plot/functional/R_HAMD_averaged.txt /media/brainstimmaps/DATA/20xx_Projects/2025_DBSinDepression/03_Data/AtlasCollection/Brodmann/Brodmann_known_default_bilateral.txt /media/brainstimmaps/DATA/20xx_Projects/2025_DBSinDepression/03_Data/functional_HCP/transformationsBrodmann/separated_Known_Brodmann/bilateral
 
 #$functional_image_path $output_path $LUT_path $separated_path
