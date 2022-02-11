@@ -30,8 +30,7 @@ compute_Brodmann_average()
       stringarray=($line)
       code=${stringarray[0]}
       label=${stringarray[1]}
-
-      if ! [[ -z "${code// }" ]]; # we remove the blank space between left ans right hemisphere - specific to bradmann known parcelllation
+      if ! [[ -z "${code// }" ]]; # we remove the blank space between left ans right hemisphere - specific to bradmann known parcellation
       then
 
         average_in_this_area=$(mrstats -output mean -mask $separated_path/$label.nii $functional_image_path)

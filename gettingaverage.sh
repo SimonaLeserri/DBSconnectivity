@@ -20,7 +20,7 @@ fi
 #cd $path/$pat/VTA_tracts
 
 for subdir in `find $path/$pat/VTA_tracts/VTA* -maxdepth 0 -type d`; do
-#compute_Brodmann_average  $subdir/z_fingerprint.nii $subdir/averaged_z_fingerprint.txt /media/brainstimmaps/DATA/20xx_Projects/2025_DBSinDepression/03_Data/AtlasCollection/Brodmann/Brodmann_known_default_bilateral_ATTEMPT.txt /media/brainstimmaps/DATA/20xx_Projects/2025_DBSinDepression/03_Data/functional_HCP/transformationsBrodmann/separated_Known_Brodmann/ciao
+compute_Brodmann_average  $subdir/z_fingerprint.nii $subdir/averaged_z_fingerprint.txt /media/brainstimmaps/DATA/20xx_Projects/2025_DBSinDepression/03_Data/AtlasCollection/Brodmann/Brodmann_known_default_bilateral.txt /media/brainstimmaps/DATA/20xx_Projects/2025_DBSinDepression/03_Data/functional_HCP/transformationsBrodmann/separated_Known_Brodmann/bilateral/regridded
 python bimodal_plot.py --patient_path $path/$pat --plot_path $path/$pat/VTA_tracts/plot --save_path $subdir --VTA_code $subdir
 done
 
