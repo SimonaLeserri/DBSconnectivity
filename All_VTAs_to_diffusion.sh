@@ -29,7 +29,7 @@ mkdir -p 2patient #creates folder iff it is not already there
 lead_path=$path/$pat/lead_recon
 #
 # AIM Get transformation matrix diffusion - anat_t1
-mask_while $lead_path anat_t1.nii anat_t1_bet # for patient 3 too much neck included, we manually repeated the bet with -R option
+mask_while $lead_path anat_t1.nii anat_t1_bet # for patient 3 and 2 too much neck included, we manually repeated the bet with -R option
 
 flirt -in DWI/working_data/b0_bet.nii.gz -ref $lead_path/anat_t1_bet.nii.gz -omat 2patient/diff2anat1.mat -out 2patient/dwi2anat_coreg.nii.gz -cost normmi -dof 7
 mrview  $lead_path/anat_t1.nii -overlay.load 2patient/dwi2anat_coreg.nii.gz

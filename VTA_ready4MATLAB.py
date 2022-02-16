@@ -157,21 +157,24 @@ def main(args):
     all_sessions_df = all_sessions_df.dropna(axis=1, how='all')  #index is time ordered session code
     uniques_vtas_df = all_sessions_df.drop_duplicates().reset_index().drop('index',axis=1) #index is unique vta code, previos index turns into new column name index and we drop it
 
+    if len(all_sessions_df.drop_duplicates()) != len(all_sessions_df): # if there are replicates that is to say more session sharing stimulation
+        # Group together the sessions code corresponding to unique DBS parameters
+        df = all_sessions_df[all_sessions_df.duplicated(keep=False)]
 
-    # Group together the sessions code corresponding to unique DBS parameters
-    df = all_sessions_df[all_sessions_df.duplicated(keep=False)]
+        # introducing a trick that works only with all non-nan values
+        df_no_nan = df.fillna(999)
+        repet = df_no_nan.groupby(list(df_no_nan)).apply(lambda x: tuple(x.index)).tolist()
 
-    # introducing a trick that works only with all non-nan values
-    df_no_nan = df.fillna(999)
-    repet = df_no_nan.groupby(list(df_no_nan)).apply(lambda x: tuple(x.index)).tolist()
+        repet = [list(el) for el in repet]
+        melted_repetitions = [item for sublist in repet for item in sublist]
+        repet = repet + [[index] for index in all_sessions_df.index.to_list() if index not in melted_repetitions]
+        repet.sort()  # done inplace
 
-    repet = [list(el) for el in repet]
-    melted_repetitions = [item for sublist in repet for item in sublist]
-    repet = repet + [[index] for index in all_sessions_df.index.to_list() if index not in melted_repetitions]
-    repet.sort()  # done inplace
+        # create a dict unique_vta_code : list of sessions with common stimulation parameters
+        unique_code = {i: time_ordered_session_code for i, time_ordered_session_code in enumerate(repet)}
 
-    # create a dict unique_vta_code : list of sessions with common stimulation parameters
-    unique_code = {i: time_ordered_session_code for i, time_ordered_session_code in enumerate(repet)}
+    else:
+        unique_code = {i: [i] for i in all_sessions_df.index}
 
     # save sorted dates
     sorted_dates = [el['date'].strftime("%d.%m.%Y") for el in list(all_sessions_dict_replaced_sorted.values())]

@@ -1,11 +1,12 @@
 
 function manualVTA(varargin)
-   
+
+    p = inputParser; 
     pathExists = @(x) exist(x,'dir');
     addRequired(p,'patientfolder', pathExists);
     parse(p,varargin{:});
 
-    leadFolder = fullfile(p.results.patientFolder,'lead_recon/')
+    leadFolder = fullfile(p.Results.patientfolder,'lead_recon/')
     load(fullfile(leadFolder,'all_VTAs.mat'))
 
     fn = fieldnames(all_VTAs);
@@ -28,7 +29,7 @@ function manualVTA(varargin)
         ea_genvat_horn([], single_VTA, 2, options, single_VTA.label);
         fprintf('LEFT DONE !!!!!!!!!!!!!!!!!!!!')
 
-        movefile(fullfile(leadFolder, 'stimulations/MNI_ICBM_2009b_NLIN_ASYM/',single_VTA.label,'/'),  fullfile(patientFolder,'VTA_tracts/'))
+        movefile(fullfile(leadFolder, 'stimulations/MNI_ICBM_2009b_NLIN_ASYM/',single_VTA.label,'/'),  fullfile(p.Results.patientfolder,'VTA_tracts/'))
     end
 
    

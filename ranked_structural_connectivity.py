@@ -68,14 +68,16 @@ def plot_connectivity(dataframe,save_dir):
 
     return
 
-def visualize_connectivity(df, n_areas,save_dir):
+def visualize_connectivity(df, n_areas,save_dir,show=False):
     # df comes from the '{hemi}_{idx}_Brod_vec_weight.csv' and has columns label, sum_of_weight, date
     total_weight_day = df.groupby(['date']).sum().to_dict()['sum_of_weight']
     df['perc'] = df.apply(lambda x: (x.sum_of_weight / total_weight_day[x.date]) * 100, axis=1)
     minimized = df.groupby('date', as_index=False).apply(lambda x: minimize(x, n_areas)).reset_index()
     pivoted = minimized.pivot(index='date', columns='area', values='perc').reset_index().sort_values(by='date')
-    plot_connectivity(pivoted,save_dir)
-    # pivoted['date'] = pivoted.apply(lambda x : pd.to_datetime(x.date,format = '%d/%m/%Y'),axis=1) #here is the problem
+    if show:
+        plot_connectivity(pivoted,save_dir)
+    else:
+        pivoted['date'] = pivoted.apply(lambda x : pd.to_datetime(x.date,format = '%d.%m.%Y'),axis=1) #here is the problem
     return pivoted
 
 
@@ -147,7 +149,7 @@ def main(args):
     labels = get_labels(args.parcellation_path_Brodmann, mode)
     # for side in ['left','right']:
     bilateral_df = bilateral_video(labels, args.vta_path, dates, sorted_code_list)
-    piv = visualize_connectivity(bilateral_df, args.n_areas,args.save_path)
+    piv = visualize_connectivity(bilateral_df, args.n_areas,args.save_path, show=True)
     ranked_connectivity(ranks, piv, args.save_path)
 
 

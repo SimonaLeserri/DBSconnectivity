@@ -22,14 +22,14 @@ brodmann_path=$path/AtlasCollection/Brodmann
 lead_path=$path/$pat/lead_recon
 
 #ive created the default just to have label in continuous increasing order
-#python CreatingLUT.py --full_path $brodmann_path/BrodmannColorLUT.txt
+python CreatingLUT.py --full_path $brodmann_path/BrodmannColorLUT.txt
 cd $path/$pat
 #
-#labelconvert $brodmann_path/Brodmann_ICBM152.nii.gz $brodmann_path/BrodmannColorLUT.txt $brodmann_path/Brodmann_known_default.txt 2patient/Brodmann_known_nodesMNI.mif
-##transform from MNI to anatt1 (nonlinear) using warp created in All_VTAs_to_diffusion staring from Glanatt1 - linear opnion needed cause atlas should have only positive integer values
-## linear transform anatt1-diffusion using transformations created in All_VTAs_toDiffusion
-#mrtransform -warp 2patient/mrtrix_warp_corrected_inv.mif  -interp nearest 2patient/Brodmann_known_nodesMNI.mif - | mrtransform - -linear 2patient/diff2anat1.txt -inverse 2patient/Brodmann_known_nodes_coreg.mif
-#
+labelconvert $brodmann_path/Brodmann_ICBM152.nii.gz $brodmann_path/BrodmannColorLUT.txt $brodmann_path/Brodmann_known_default.txt 2patient/Brodmann_known_nodesMNI.mif
+#transform from MNI to anatt1 (nonlinear) using warp created in All_VTAs_to_diffusion staring from Glanatt1 - linear opnion needed cause atlas should have only positive integer values
+# linear transform anatt1-diffusion using transformations created in All_VTAs_toDiffusion
+mrtransform -warp 2patient/mrtrix_warp_corrected_inv.mif  -interp nearest 2patient/Brodmann_known_nodesMNI.mif - | mrtransform - -linear 2patient/diff2anat1.txt -inverse 2patient/Brodmann_known_nodes_coreg.mif
+
 
 coreg_nodes=2patient/Brodmann_known_nodes_coreg.mif
 

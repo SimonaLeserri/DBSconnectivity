@@ -45,7 +45,7 @@ function create_significant_image_bilateral(full_path_empirical_R_image, measure
     
     empirical_linear = reshape(empiricalmatrix,[],1);
     copy = empirical_linear;
-    copy(nonsignificant) = 0 ;
+    copy(nonsignificant) = NaN ;
     filename = strcat('significant_Voxels_for_measure_',measure,'.nii');
     add_header_and_save3D(copy, empiricalR,fullfile(save_folder, filename));
     

@@ -6,7 +6,7 @@ import matplotlib.lines as mlines
 import pandas as pd
 
 
-def bimodal_connectivity(bimodal, VTA_name, destination_folder, sorting=False, scaling=False):
+def bimodal_connectivity(bimodal, VTA_name, destination_folder=False, sorting=False, scaling=False):
     # define 4 color-blind friendly colors from https://gist.github.com/thriveth/8560036
     col1 = '#377eb8'
     col2 = '#ff7f00'
@@ -63,9 +63,11 @@ def bimodal_connectivity(bimodal, VTA_name, destination_folder, sorting=False, s
     plt.legend(handles=handles, bbox_to_anchor=(1.25, 0.95), fancybox=True,
                shadow=True)
     # defining display layout
-    #plt.show()
-    plt.savefig(os.path.join(destination_folder, 'Bimodal_connectivity_{}'.format(VTA_name)), bbox_inches='tight')
 
+    if destination_folder:
+        plt.savefig(os.path.join(destination_folder, 'Bimodal_connectivity_{}'.format(VTA_name)), bbox_inches='tight')
+    else:
+        plt.show()
     return
 
 def main(args):

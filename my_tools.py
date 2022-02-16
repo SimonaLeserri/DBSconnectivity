@@ -10,11 +10,13 @@ def get_max(weird_string):
     return max(new_vals)
 
 def parse_excel_outcome(filepath,max_val_assessment):
-
     df = pd.read_excel(filepath)
 
     visit_dict = {}
     visit_dict['date'] = df.iloc[3, 4]
+    if visit_dict['date'] != visit_dict['date']: #if it is nan
+        date_in_title = filepath.split('_')[-1].split('.xlsm')[0]
+        visit_dict['date'] = date_in_title.replace('-','.')
     visit_dict['misterious_date'] = df.iloc[5, 6]
     scores_df = df.iloc[9:, 3:5]
 
