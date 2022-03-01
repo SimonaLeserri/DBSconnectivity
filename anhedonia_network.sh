@@ -1,7 +1,24 @@
 #!/bin/bash
 
-path=/media/brainstimmaps/DATA/20xx_Projects/2025_DBSinDepression/03_Data
-pat=Patient1
+#!/bin/bash
+source ./utils.sh
+
+#Data path of all the project
+echo "Enter the complete data path of the project: "
+path=$(get_path )  #E.g. path="/home/brainstimmaps/20xx_Projects/2023_Deep/03_Data"
+
+# Patient subfolder
+echo "Enter the patient ID: "
+pat=$(get_patient )
+pat_exist=$(check_original_data $path/$pat)
+
+echo "${pat_exist% *}"
+
+if [ "${pat_exist: -2}" = "-1" ] ; then
+exit
+fi
+
+
 cd $path/$pat
 # GET ROIs (NAC/CAU/PFC) in native patient space
 

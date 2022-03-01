@@ -3,6 +3,8 @@ from my_tools import *
 
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
+plt.rcParams.update({'font.size': 17})
+
 
 #also saves the percentage improvements needed for RMaps computations
 

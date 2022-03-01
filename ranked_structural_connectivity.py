@@ -3,6 +3,25 @@ from my_tools import *
 import matplotlib.pyplot as plt
 from matplotlib import rcParams, cycler
 
+rcParams.update({'font.size': 17})
+
+def change_alpha(four_el_array):
+    four_el_array[-1] = 0.5
+
+    return four_el_array
+
+def every_other4(lst):
+    return lst[0::4] + lst[1::4] + lst[2::4] + lst[3::4]
+
+def change_order(lst):
+    #given [11,12,13,14,15] returns [15,14,11,12,13]
+    #given [11,12,13,14,15,16] returns [16,15,14,11,12,13]
+    if len(lst) %2: #odd
+        new_order = lst[::-1][0:len(lst)//2]+lst[0:len(lst)//2+1]
+    else:
+        new_order = lst[::-1][0:len(lst) // 2] + lst[0:len(lst) // 2 + 1][0:-1]
+
+    return new_order
 def minimize(portion,numb):
     portion = portion.sort_values(by='perc',ascending=False)
     reduced = portion.iloc[:numb].append(portion.iloc[numb:].sum(),ignore_index=True)
@@ -29,10 +48,10 @@ def all_ranks(measure_dict):
 
     return all_ranks
 
-def plot_connectivity(dataframe,save_dir):
+def plot_connectivity(dataframe,save_dir,common_colors_dict):
     # dataframe has as many rows as there are sessions, the date column and one more column than numb (used in minimize )
 
-    fig, ax = plt.subplots(figsize=(12, 8))
+    fig, ax = plt.subplots(figsize=(8, 8))
 
     dataframe['date'] = dataframe.apply(lambda x: pd.to_datetime(x.date, format='%d.%m.%Y'), axis=1)  # datetime
     dataframe = dataframe.sort_values(by='date')
@@ -53,40 +72,44 @@ def plot_connectivity(dataframe,save_dir):
     bottoms = np.insert(bottoms, 0, np.zeros(len(bottoms[0])), axis=0)  # adds a first row of zeros
     for btms, (idxs, vals) in enumerate(list(zip(indexes, heights))[::order]):
         mps = np.take(np.array(to_use.columns), idxs)  # get name of column at idxs
-        ax.bar(x, height=vals, bottom=bottoms[btms], color=[mpp_colors[m] for m in mps])
+        ax.bar(x, height=vals, bottom=bottoms[btms], color=[common_colors_dict[m] for m in mps])
 
     ax.set_ylim(bottom=0, top=102)
     plt.legend((np.take(np.array(to_use.columns), np.argsort(to_use.values)[0]))[::order], loc='center right',
-               bbox_to_anchor=(1.20, 0.5), fancybox=True,
+               bbox_to_anchor=(1.40, 0.5), fancybox=True,
                shadow=True, title='Brodmann area')
     plt.xticks(rotation=45)
-    plt.title('VTA to Brodmann cortical areas % connectivity')
+    plt.title('VATs\' structural connectivity profiles')
     plt.xlabel('date')
-    plt.ylabel('% connectivity')
+    plt.ylabel('% of strength connectivity')
     plt.show()
-    plt.savefig(os.path.join(save_dir, 'Time_sorted_VTAs'), bbox_inches="tight")
+    plt.savefig(os.path.join(save_dir, 'Time_sorted_VTAs_colors_FINAL'), bbox_inches="tight")
 
     return
 
-def visualize_connectivity(df, n_areas,save_dir,show=False):
+def visualize_connectivity(df, n_areas,save_dir, show=False,common_colors = False):
     # df comes from the '{hemi}_{idx}_Brod_vec_weight.csv' and has columns label, sum_of_weight, date
     total_weight_day = df.groupby(['date']).sum().to_dict()['sum_of_weight']
     df['perc'] = df.apply(lambda x: (x.sum_of_weight / total_weight_day[x.date]) * 100, axis=1)
     minimized = df.groupby('date', as_index=False).apply(lambda x: minimize(x, n_areas)).reset_index()
     pivoted = minimized.pivot(index='date', columns='area', values='perc').reset_index().sort_values(by='date')
     if show:
-        plot_connectivity(pivoted,save_dir)
+        plot_connectivity(pivoted,save_dir, common_colors)
     else:
         pivoted['date'] = pivoted.apply(lambda x : pd.to_datetime(x.date,format = '%d.%m.%Y'),axis=1) #here is the problem
     return pivoted
 
-
-def plot_connectivity_rank(dataframe, sorting,save_dir):
+def define_pattern(i):
+    pattern = None
+    if i % 2 == 0:
+        pattern = '///'
+    return pattern
+def plot_connectivity_rank(dataframe, sorting,save_dir,common_colors_dict):
     # dataframe has as many rows as there are sessions,
     # the date column and one more column than numb (used in minimize ) to describe cortical areas
     # the variable column
 
-    fig, ax = plt.subplots(figsize=(12, 8))
+    fig, ax = plt.subplots(figsize=(8, 8))
     dataframe = dataframe.sort_values(by=[sorting, 'date'], ascending=False).reset_index()
     last_good = len(dataframe[dataframe[sorting] >= 50])
     dictio = dataframe[sorting].to_dict()  # changed 'date to sorting'
@@ -108,31 +131,32 @@ def plot_connectivity_rank(dataframe, sorting,save_dir):
     # mpp_colors = dict(zip(to_use.columns, plt.rcParams['axes.prop_cycle'].by_key()['color']))
     for btms, (idxs, vals) in enumerate(list(zip(indexes, heights))[::order]):
         mps = np.take(np.array(to_use.columns), idxs)  # get name of column at idxs
-        ax.bar(x, height=vals, bottom=bottoms[btms], color=[mpp_colors[m] for m in mps])
+        ax.bar(x, height=vals, bottom=bottoms[btms], color=[common_colors_dict[m] for m in mps])
 
+    ax.xaxis.labelpad = 20
     ax.set_ylim(bottom=0, top=102)
     plt.legend((np.take(np.array(to_use.columns), np.argsort(to_use.values)[0]))[::order], loc='center right',
-               bbox_to_anchor=(1.20, 0.5), fancybox=True,
+               bbox_to_anchor=(1.40, 0.5), fancybox=True,
                shadow=True, title='Brodmann area')
     plt.xticks(x, [dictio[el] for el in x], rotation=-45)  # removed strftime()
     if last_good != 0:
         plt.axvline(x=last_good - 0.5, color='k', linestyle='--')
-    plt.title('VTA to Brodmann cortical areas, ranked by clinical measure: {m}'.format(m=sorting))
-    plt.xlabel('% improvement wrt baseline')
-    plt.ylabel('% connectivity')
+    plt.title('VATs\' structural connectivity profiles, ranked by clinical measure: {m}'.format(m=sorting))
+    plt.xlabel('% improvement with respect to baseline')
+    plt.ylabel('% of strength connectivity')
     plt.show()
-    plt.savefig(os.path.join(save_dir, '{what}_sorted_VTAs'.format(what=sorting)), bbox_inches="tight")
+    plt.savefig(os.path.join(save_dir, '{what}_sorted_VTAs_colors_FINAL'.format(what=sorting)), bbox_inches="tight")
 
     return
 
-def ranked_connectivity(ranks_dict, pivoted_df,save_dir):
+def ranked_connectivity(ranks_dict, pivoted_df,save_dir, common_colors):
     for measure, measure_df in ranks_dict.items():
 
         dictionary = measure_df[['date', 'perc_impro']].set_index('date').to_dict()['perc_impro']
         piv_copy = pivoted_df.copy()
         piv_copy[measure] = piv_copy.apply(lambda x: dictionary[x.date], axis=1)
 
-        plot_connectivity_rank(piv_copy, measure,save_dir)
+        plot_connectivity_rank(piv_copy, measure,save_dir,common_colors)
 
     return
 
@@ -149,8 +173,19 @@ def main(args):
     labels = get_labels(args.parcellation_path_Brodmann, mode)
     # for side in ['left','right']:
     bilateral_df = bilateral_video(labels, args.vta_path, dates, sorted_code_list)
-    piv = visualize_connectivity(bilateral_df, args.n_areas,args.save_path, show=True)
-    ranked_connectivity(ranks, piv, args.save_path)
+    bilateral_labels = list(bilateral_df.area.unique())
+    bilateral_labels.append('All_other')
+    bilateral_labels = every_other4(bilateral_labels)
+    #bilateral_labels = change_order(bilateral_labels)
+    cmap = plt.cm.tab20
+    rcParams['axes.prop_cycle'] = cycler(color=cmap(np.linspace(0, 1, 40)))
+    list_arrays = rcParams['axes.prop_cycle'].by_key()['color']
+    list_arrays_alpha = [change_alpha(el) if i % 2 == 0 else el for i, el in enumerate(list_arrays)]
+    my_colors = dict(zip(bilateral_labels, list_arrays_alpha))
+    colors = dict(zip(bilateral_labels, rcParams['axes.prop_cycle'].by_key()['color']))
+
+    piv = visualize_connectivity(bilateral_df, args.n_areas,args.save_path, show=True, common_colors=my_colors)
+    ranked_connectivity(ranks, piv, args.save_path, my_colors)
 
 
     return

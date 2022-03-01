@@ -40,6 +40,43 @@ compute_Brodmann_average()
   done<$LUT_path #bilateral
   #when reading from 78 brodmann LUT use done< <(tail +7 $LUT_path) cause we know that in there the header is 7 lines long
 }
+
+compute_Brodmann_average_number()
+{
+  functional_image_path="$1"
+
+  output_path="$2"
+
+  LUT_path="$3"
+
+  separated_path="$4"
+
+  echo code label average_value n_voxels perthousand_sig_on_area >> $output_path
+  while IFS= read -r line; do
+      stringarray=($line)
+      code=${stringarray[0]}
+      label=${stringarray[1]}
+      if ! [[ -z "${code// }" ]]; # we remove the blank space between left ans right hemisphere - specific to bradmann known parcellation
+      then
+
+        average_in_this_area=$(mrstats -output mean -ignorezero -mask $separated_path/$label.nii  $functional_image_path)
+        echo $average_in_this_area
+        if [ -z "$average_in_this_area" ]
+        then
+              echo "\$average_in_this_area is empty"
+              N_sig_voxels_in_this_area=0
+        else
+              echo "\$average_in_this_area is NOT empty"
+              N_sig_voxels_in_this_area=$(mrstats -output count -ignorezero -mask $separated_path/$label.nii $functional_image_path)
+        fi
+        N_voxels_in_this_area=$(mrstats -output count $separated_path/$label.nii)
+        perthousand_significant_on_area=$(bc <<< "scale=2;$N_sig_voxels_in_this_area*1000/$N_voxels_in_this_area")
+        echo $code $label $average_in_this_area $N_sig_voxels_in_this_area $perthousand_significant_on_area>> $output_path
+      fi
+
+  done<$LUT_path #bilateral
+  #when reading from 78 brodmann LUT use done< <(tail +7 $LUT_path) cause we know that in there the header is 7 lines long
+}
 check_original_data()
 
 # warns if the needed images (T1.mif T2.mif dwi_raw.mif postop_tra.nii)

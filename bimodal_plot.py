@@ -46,9 +46,9 @@ def bimodal_connectivity(bimodal, VTA_name, destination_folder=False, sorting=Fa
 
     ax2.bar(bimodal.label, bimodal.perc, label='Structural connectivity', color='b', alpha=0.2)
     positive = mlines.Line2D([], [], color=col1, marker='.',
-                             markersize=15, label='Positive functional connectivity')
-    negative = mlines.Line2D([], [], color=col2, marker='.',
                              markersize=15, label='Negative functional connectivity')
+    negative = mlines.Line2D([], [], color=col2, marker='.',
+                             markersize=15, label='Positive functional connectivity')
 
     ax2.set_ylabel('% weights VTA to BA', color=col4, weight='bold')
     ax2.tick_params(axis='y', colors=col4)
