@@ -81,7 +81,6 @@ def bilateral_video(labels, vta_path, dates, sorted_code_list):
     together = pd.DataFrame()
     for df in ordered_list_VTA:
         together = together.append(df, ignore_index=True)
-
     return together
 
 def create_bilateral_df (VTA_id, labels, parent_path,date):

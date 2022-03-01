@@ -133,7 +133,7 @@ Open a terminal where these scripts are stored and
 
 24. I. reading_permutations.m
 
-25. I. brodmann2functional.sh (attemptregrid?)
+25. I. brodmann2functional.sh 
 
 26. I. Rebuild_average_image.m
 
