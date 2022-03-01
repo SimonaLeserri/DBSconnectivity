@@ -1,4 +1,3 @@
-
 source ./utils.sh
 
 # Data path of all the project

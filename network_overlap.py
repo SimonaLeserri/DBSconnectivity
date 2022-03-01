@@ -1,7 +1,8 @@
 import argparse
 import matplotlib.pyplot as plt
 from my_tools import *
-
+from matplotlib import rcParams
+rcParams.update({'font.size': 17})
 
 def compute_overlap(VTA_tracts, VTA_tracts_path, total_weights, sorted_codes):
     overlap = {}
@@ -35,8 +36,8 @@ def plot_overlap(overlap, measures_df, destination_folder, dates):
     for unique_measure in measures_df.measure.unique():
         if unique_measure == 'SHAPS':  # is the Anhedonia measure
             little_df = measures_df[measures_df.measure == unique_measure].reset_index()
-            fig, ax = plt.subplots(figsize=(10, 5))
-            plt.title('Anhedonia network recruitment vs {} assessment'.format(unique_measure))
+            fig, ax = plt.subplots(figsize=(15, 8))
+            plt.title('Reward network recruitment vs {} assessment'.format(unique_measure))
 
             # using the twinx() for creating another
             # axes object for secondary y-Axis
@@ -47,9 +48,10 @@ def plot_overlap(overlap, measures_df, destination_folder, dates):
             ax.set_ylim([0, 100])
             # giving labels to the axes
             ax.set_xlabel('session')
+            ax.xaxis.labelpad = 20
             ax.set_ylabel('% of Anhedonia network recruited - weights', color='g')
 
-            ax2.set_ylim([0, 100])
+            ax2.set_ylim([0, 101])
             plot_2 = ax2.plot(little_df.index, little_df.value, label='Anhedonia scale', color='b')
             # secondary y-axis label
             ax2.set_ylabel('% of {} scale'.format(unique_measure), color='b')
@@ -61,7 +63,7 @@ def plot_overlap(overlap, measures_df, destination_folder, dates):
 
             # defining display layout
             plt.show()
-            plt.savefig(os.path.join(destination_folder, 'AN_overlap_{}'.format(unique_measure)), bbox_inches="tight")
+            plt.savefig(os.path.join(destination_folder, 'AN_overlap_{}_FINAL'.format(unique_measure)), bbox_inches="tight")
     return
 
 def main(args):
