@@ -85,7 +85,7 @@ def main(args):
     max_val_assessment = dict(zip(list_of_assessments, [63, 65, 60, 14, 30, 100, 14]))  # from the summary file
 
     df = read_assessments(dates, Pat.assessment_path, Pat.baseline_file, Pat.files_to_remove)
-    df.to_csv(os.path.join(Pat.plot_path,'outcomes', 'Depression_scales_evolution.csv')) # check if/when used
+    df.to_csv(os.path.join(Pat.plot_path,'outcomes', 'Depression_scales_evolution.csv')) # used in create_tables
     
     os.makedirs(os.path.join(Pat.plot_path, 'outcomes'), exist_ok=True)
     fig, ax = plt.subplots(figsize=(15, 8))

@@ -112,9 +112,9 @@ Open a terminal where these scripts are stored and
 
 12. I. Run plottingVideo.py 
 
-13. I. Run PlotOutcomes.py (modify as in assessment plot static aka untitled ipynb) *
+13. I. Run PlotOutcomes.py
 
-14. G. table sessions.ipynb *
+14. G. create_tables.py
 
 15. I. Run ranked_structural_connectivity.py (include area/16 notebook) *
 
