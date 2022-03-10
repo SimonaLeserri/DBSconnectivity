@@ -136,7 +136,7 @@ Open a terminal where these scripts are stored and
 
 21. I. fingerprint_all_sessions.m
 
-22. I functional profile.ipynb *
+22. I. functional profile.ipynb *
 
 22. I. creatingRmap.m
 
@@ -148,7 +148,7 @@ Open a terminal where these scripts are stored and
 
 26. I. averageOptimalConnectivity.sh
 
-27. I stats on sig .ipynb *
+27. I. stats on sig .ipynb *
 
 27. I. gettingaverage.sh
 
