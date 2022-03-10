@@ -1,12 +1,12 @@
 # Connectivity pipeline
 
-Here is the pipeline for the analysis of Deep Brain Stimulation (DBS) connectivity for patients with Major Depressive Disorder.
-It contains the code for my ongoing master thesis at the ['Brain Stimulation Mapping group at Inselspital and ARTORG Bern'](https://www.brainstimmapping.science/)
+Here is the pipeline for the analysis of Deep Brain Stimulation (DBS) connectivity for patients with Treatment Resistant Depression.
+It contains the code for my master thesis at the ['Brain Stimulation Mapping group at Inselspital and ARTORG Bern'](https://www.brainstimmapping.science/)
 Starting from patient-specific structural and diffusion MRI images we will obtain:  
 
 1. wholebrain streamlines reconstruction based on diffusion weighted imaging and probabilistic tractography (using ['MRtrix3](https://github.com/MRtrix3/mrtrix3))
-2. Lead reconstruction and Volume of Tissue Activated (VTA) estimation (using ['LeadDBS](https://github.com/netstim/leaddbs))
-3. VTA to cortex structural connectivity
+2. Lead reconstruction and Volume of Activated Tissue (VTA) estimation (using ['LeadDBS](https://github.com/netstim/leaddbs))
+3. VAT to cortex structural connectivity
 4. Functional connectivity based on Human Connectome Project resting state information
 5. Correlation of connectivity with MDD clinical outcome
 
@@ -74,7 +74,11 @@ In the second line, the first three columns represent the reversed phase encodin
 
 ## HOW TO RUN
 The entire pipeline, shown in picture is to be performed in different steps, so as to ensure visual inspections of some crucial intermediate points.
-More detailed descriptions are provided for each step, in the corresponding script.
+More detailed descriptions are provided for each step in the corresponding script.
+NOTE: 
+I stands for individual: the script is meant to work for each subject separately; 
+G stands for group : the script works on the overall patient group;
+O stands for once : you only need to perform the operation once.
 Open a terminal where these scripts are stored and
 
 **Diffusion (Pre)processing**
@@ -88,26 +92,31 @@ Open a terminal where these scripts are stored and
 **DBS reconstruction**
 
 7. I. Create the folder lead_recon and copy the necessary files to perform lead reconstruction through lead-DBS. Follow the naming convention carefully.
-    DATA WRANGLING 
-   1. I. Run Read_stimulation_parameters.py
 
-   2. I. Copy the jupyter notebook Correcting VTAs and adapt it to the patient's specific error - Not provided for privacy reasons
+8. I. Run create_patient_instance.py
 
-   3. I. Run VTA_ready4MATLAB.py
+        DATA WRANGLING 
+        1. I. Run Read_stimulation_parameters.py
 
-8. I. Run manualVTA.m
+        2. I. Copy the jupyter notebook Correcting VTAs and adapt it to the patient's specific error - Not provided for privacy reasons *
 
-9. I. Run All_VTAs_to_diffusion.sh (now bilateral!)
+        3. I. Run VTA_ready4MATLAB.py
+
+9. I. Run manualVTA.m
+
+10. I. Run All_VTAs_to_diffusion.sh 
 
 **Tractography** 
 
-10. I. Run brodmann.sh 
+11. I. Run brodmann.sh 
 
-11. I. Run plottingVideo.py (only Brodmann plotted)
+12. I. Run plottingVideo.py 
 
-12. I. Run PlotOutcomes.py
+13. I. Run PlotOutcomes.py (modify as in assessment plot static aka untitled ipynb) *
 
-13. I. ranked_structural_connectivity.py
+14. G. table sessions.ipynb *
+
+15. I. Run ranked_structural_connectivity.py (include area/16 notebook) *
 
 **Functional**
 
@@ -127,6 +136,8 @@ Open a terminal where these scripts are stored and
 
 21. I. fingerprint_all_sessions.m
 
+22. I functional profile.ipynb *
+
 22. I. creatingRmap.m
 
 23. I. creating_permutations.m
@@ -135,10 +146,13 @@ Open a terminal where these scripts are stored and
 
 25. I. brodmann2functional.sh 
 
-26. I. Rebuild_average_image.m
+26. I. averageOptimalConnectivity.sh
+
+27. I stats on sig .ipynb *
 
 27. I. gettingaverage.sh
 
+28. G. best worst *
 **Network**
 
 28. I. anhedonia_network.sh
