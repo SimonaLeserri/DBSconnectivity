@@ -16,8 +16,8 @@ function fingerprint_all_sessions(varargin) %path, pat, assessment
    
    pathExists = @(x) exist(x,'dir');
    fileExists = @(x) isfile(x);
-   addRequired(p,'vtas_path', pathExists); % subject specific VTA_tracts folder
-   addRequired(p,'HCP_path',pathExists); %local
+   addRequired(p,'vtas_path', pathExists); % subject specific VTA_tracts folder ending / is important
+   addRequired(p,'HCP_path',pathExists); %local ending / is important
    addRequired(p, 'order', fileExists); % path till plot/sorted code list created in 
    parse(p,varargin{:});
    

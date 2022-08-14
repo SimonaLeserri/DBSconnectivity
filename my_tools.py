@@ -189,3 +189,60 @@ def read_assessments(dates, assessment_path,baseline_file, files_to_remove ):
     df = create_assessment_df(parsed_dict, baseline_dict, baseline_assessments)
     #df has n_assessment*n-sessions rows with columns measure,date and values(already in %)
     return df
+
+def read_FINAL_assessments(datefile, assessment_path,baseline_file,FINAL_filename):
+
+    #inputs are file or folder paths
+
+    #Creates the dictionary with max values for each assessment scale
+    list_of_assessments = ['BDI', 'HAMD', 'MADRS', 'SHAPS', 'Sheehan', 'SOFAS', 'BARS']
+    max_val_assessment = dict(zip(list_of_assessments, [63, 65, 60, 14, 30, 100, 14]))  # from the summary file
+    baseline_dict = parse_excel_outcome(baseline_file,max_val_assessment)
+
+    # read the values of assessments on baseline day ( stored in another file)
+    baseline_assessments = {k: baseline_dict[k] for k in list_of_assessments}
+
+    # load the dates of each dbs stimulation
+    dates = np.load(datefile)
+    #read the final, tidy file
+    all_df = pd.read_excel(FINAL_filename)
+    #gets only depression assessments
+    scores_df = all_df[['Date(DBS)','BDI','HAMD','MADRS','SHAPS','Sheehan','SOFAS','BARS']]
+
+    #converts to % value for all scales
+    for score in scores_df.columns:
+        if score in list_of_assessments:
+            scores_df[score] = round((scores_df[score] / max_val_assessment[score])*100,2)
+    scores_df  = scores_df.set_index('Date(DBS)')
+    #creates a dictionary where
+    # - keys are dates
+    # - values is a dictionary where:
+    #     - keys are the assessments variables:
+    #     - values are % scale values
+    parsed_dict = scores_df.apply(lambda row : row[['BDI','HAMD','MADRS','SHAPS','Sheehan','SOFAS','BARS']].to_dict(), axis = 1).to_dict()
+
+    percentages_impro = parsed_dict.copy()
+    #computes the % improvements wrt baseline and saves in a format ok with matlab
+    for date, inner_dict in parsed_dict.items():
+
+        percentages_impro[date] = {k: round(baseline_assessments[k] - inner_dict[k], 2) if k != 'SOFAS' else round(
+            inner_dict[k] - baseline_assessments[k], 2) for k in list_of_assessments}
+
+    percentages_impro = {'session_' + datetime.strptime(date, "%d.%m.%Y").strftime("%d_%m_%Y"): percentages_impro[date]
+                            for ind, date in enumerate(dates)}
+    #saves
+    spio.savemat(assessment_path + '/' + 'perc_impro.mat', percentages_impro)
+
+    # returns the % value of each scale
+    # a dataframe with columns ['date', 'measure', 'value'] # values is % of scale
+    df = create_assessment_df(parsed_dict, baseline_dict, baseline_assessments)
+
+    return df
+
+def get_heat_data(perc_connectivity_df,dictionary_measures):
+    connectivity_df = perc_connectivity_df.pivot(index='date', columns='area', values='perc').reset_index().sort_values(by='date')
+    for measure in dictionary_measures.keys():
+        df_measure = dictionary_measures[measure].copy()
+        df_measure['date'] = df_measure['date'].apply(lambda x : x.strftime('%d.%m.%Y'))
+        connectivity_df = pd.merge(connectivity_df,df_measure[['date','perc_impro']],on='date', how='left').rename(columns = {'perc_impro':measure})
+    return connectivity_df
